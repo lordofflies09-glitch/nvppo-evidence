@@ -129,6 +129,23 @@
                         <textarea id="description" rows="2" placeholder="Detailed item description, weight, denomination, condition..." required></textarea>
                     </div>
                     <div class="form-group">
+                        <label>Category*</label>
+                        <select id="category" required>
+                            <option value="">Select Category...</option>
+                            <option value="Firearms">Firearms</option>
+                            <option value="Motor Vehicles">Motor Vehicles</option>
+                            <option value="Motorcycles">Motorcycles</option>
+                            <option value="Dangerous Drugs">Dangerous Drugs</option>
+                            <option value="Gadgets/Electronics">Gadgets/Electronics</option>
+                            <option value="Jewelry">Jewelry</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Lumbers/Forest Products">Lumbers/Forest Products</option>
+                            <option value="Cigarette">Cigarette</option>
+                            <option value="Counterfeit products">Counterfeit products</option>
+                            <option value="Other Evidence with Monetary Value">Other Evidence with Monetary Value</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>Quantity*</label>
                         <input type="number" id="quantity" value="1" min="1" required>
                     </div>
@@ -236,6 +253,7 @@
                             <th>Operating Unit</th>
                             <th>Investigating Unit</th>
                             <th>Detailed Description</th>
+                            <th>Category</th>
                             <th>Qty</th>
                             <th>Monetary Value</th>
                             <th>Serial / Markings</th>
@@ -269,7 +287,7 @@
         }
 
         const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '<tr><td colspan="19" style="text-align:center; padding: 20px;">Loading live records from central database...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="20" style="text-align:center; padding: 20px;">Loading live records from central database...</td></tr>';
 
         try {
             const res = await fetch(SCRIPT_URL, { method: 'GET', redirect: 'follow' });
@@ -284,6 +302,7 @@
                 operatingUnit: r['Operating Unit'] || '',
                 investigatingUnit: r['Investigating Unit'] || '',
                 description: r['Detailed Description'] || '',
+                category: r['Category'] || '',
                 qty: r['Quantity'] || 1,
                 monetaryValue: r['Monetary Value'] || '',
                 serialNo: r['Serial No'] || r['Serial No.'] || '',
@@ -298,7 +317,7 @@
             renderTable();
         } catch (err) {
             console.error("Error loading records:", err);
-            tbody.innerHTML = '<tr><td colspan="19" style="text-align:center; color: red; padding: 20px;">Unable to fetch records. Check internet connection or Apps Script execution permissions.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="20" style="text-align:center; color: red; padding: 20px;">Unable to fetch records. Check internet connection or Apps Script execution permissions.</td></tr>';
         }
     }
 
@@ -307,7 +326,7 @@
         tbody.innerHTML = '';
 
         if (records.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="19" style="text-align:center; padding: 20px;">No evidence records found in master repository.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="20" style="text-align:center; padding: 20px;">No evidence records found in master repository.</td></tr>';
             return;
         }
 
@@ -324,6 +343,7 @@
                 <td>${r.operatingUnit || ''}</td>
                 <td>${r.investigatingUnit || ''}</td>
                 <td>${r.description || ''}</td>
+                <td><b>${r.category || ''}</b></td>
                 <td>${r.qty || ''}</td>
                 <td>${r.monetaryValue || ''}</td>
                 <td><code>${r.serialNo || ''}</code></td>
@@ -351,6 +371,7 @@
         document.getElementById('operatingUnit').value = r.operatingUnit || '';
         document.getElementById('investigatingUnit').value = r.investigatingUnit || '';
         document.getElementById('description').value = r.description || '';
+        document.getElementById('category').value = r.category || '';
         document.getElementById('quantity').value = r.qty || 1;
         document.getElementById('monetaryValue').value = r.monetaryValue || '';
         document.getElementById('serialNo').value = r.serialNo || '';
@@ -386,6 +407,7 @@
         const operatingUnit = document.getElementById('operatingUnit').value;
         const investigatingUnit = document.getElementById('investigatingUnit').value;
         const description = document.getElementById('description').value;
+        const category = document.getElementById('category').value;
         const qty = document.getElementById('quantity').value;
         const monetaryValue = document.getElementById('monetaryValue').value;
         const serialNo = document.getElementById('serialNo').value;
@@ -396,14 +418,14 @@
         const remarks = document.getElementById('remarks').value;
         const custodianName = document.getElementById('custodianName').value;
 
-        if (!unit || !caseRef || !incidentTitle || !dateSeized || !description || !evidenceStatus || !custodianName) {
+        if (!unit || !caseRef || !incidentTitle || !dateSeized || !description || !category || !evidenceStatus || !custodianName) {
             alert('Please fill in all mandatory fields denoted by (*).');
             return;
         }
 
         const rowArray = [
             unit, caseRef, incidentTitle, dateSeized, placeSeizure,
-            operatingUnit, investigatingUnit, description, qty, monetaryValue,
+            operatingUnit, investigatingUnit, description, category, qty, monetaryValue,
             serialNo, source, custodian, storageLocation, evidenceStatus,
             remarks, custodianName
         ];
@@ -486,13 +508,13 @@
         const headers = [
             "No.", "Unit/Office", "Case Reference (Blotter/Case No.)", "Incident Title",
             "Date Seized / Surrendered", "Place of Seizure", "Operating Unit", "Investigating Unit",
-            "Detailed Description", "Quantity", "Monetary Value", "Serial No./Markings",
+            "Detailed Description", "Category", "Quantity", "Monetary Value", "Serial No./Markings",
             "Source", "Current Custodian", "Storage Location", "Evidence Status", "Remarks", "Name of Evidence Custodian"
         ];
 
         const dataRows = targetRecords.map((r, idx) => [
             idx + 1, r.unit, r.caseRef, r.incidentTitle, r.dateSeized, r.placeSeizure,
-            r.operatingUnit, r.investigatingUnit, r.description, r.qty, r.monetaryValue,
+            r.operatingUnit, r.investigatingUnit, r.description, r.category, r.qty, r.monetaryValue,
             r.serialNo, r.source, r.custodian, r.storageLocation, r.evidenceStatus,
             r.remarks, r.custodianName
         ]);
@@ -516,4 +538,4 @@
 </script>
 
 </body>
-</html>
+</html>v
