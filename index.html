@@ -199,6 +199,10 @@
                         <label>Name of Evidence Custodian*</label>
                         <input type="text" id="custodianName" placeholder="Rank and Name of Custodian" required>
                     </div>
+                    <div class="form-group">
+                        <label>Date Turn-Over / Released / Destroyed</label>
+                        <input type="date" id="dateDisposed">
+                    </div>
                 </div>
 
                 <button type="button" id="submitBtn" class="btn-submit" onclick="saveEntry()">Submit & Add Record</button>
@@ -263,6 +267,7 @@
                             <th>Evidence Status</th>
                             <th>Remarks</th>
                             <th>Name of Evidence Custodian</th>
+                            <th>Date Turn-Over / Released / Destroyed</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -287,7 +292,7 @@
         }
 
         const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '<tr><td colspan="20" style="text-align:center; padding: 20px;">Loading live records from central database...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="21" style="text-align:center; padding: 20px;">Loading live records from central database...</td></tr>';
 
         try {
             const res = await fetch(SCRIPT_URL, { method: 'GET', redirect: 'follow' });
@@ -311,13 +316,14 @@
                 storageLocation: r['Storage Location'] || '',
                 evidenceStatus: r['Evidence Status'] || '',
                 remarks: r['Remarks'] || '',
-                custodianName: r['Name of Evidence Custodian'] || ''
+                custodianName: r['Name of Evidence Custodian'] || '',
+                dateDisposed: r['Date Turn-Over/Released/Destroyed'] || r['Date Turn-Over / Released / Destroyed'] ? String(r['Date Turn-Over/Released/Destroyed'] || r['Date Turn-Over / Released / Destroyed']).substring(0,10) : ''
             }));
 
             renderTable();
         } catch (err) {
             console.error("Error loading records:", err);
-            tbody.innerHTML = '<tr><td colspan="20" style="text-align:center; color: red; padding: 20px;">Unable to fetch records. Check internet connection or Apps Script execution permissions.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="21" style="text-align:center; color: red; padding: 20px;">Unable to fetch records. Check internet connection or Apps Script execution permissions.</td></tr>';
         }
     }
 
@@ -326,7 +332,7 @@
         tbody.innerHTML = '';
 
         if (records.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="20" style="text-align:center; padding: 20px;">No evidence records found in master repository.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="21" style="text-align:center; padding: 20px;">No evidence records found in master repository.</td></tr>';
             return;
         }
 
@@ -353,6 +359,7 @@
                 <td><span class="badge">${r.evidenceStatus || ''}</span></td>
                 <td>${r.remarks || ''}</td>
                 <td><b>${r.custodianName || ''}</b></td>
+                <td>${r.dateDisposed || ''}</td>
             `;
             tbody.appendChild(tr);
         });
@@ -381,6 +388,7 @@
         document.getElementById('evidenceStatus').value = r.evidenceStatus || '';
         document.getElementById('remarks').value = r.remarks || '';
         document.getElementById('custodianName').value = r.custodianName || '';
+        document.getElementById('dateDisposed').value = r.dateDisposed || '';
 
         document.getElementById('formHeader').innerText = `Editing Entry Record #${index + 1}`;
         document.getElementById('submitBtn').innerText = 'Update Record';
@@ -417,6 +425,7 @@
         const evidenceStatus = document.getElementById('evidenceStatus').value;
         const remarks = document.getElementById('remarks').value;
         const custodianName = document.getElementById('custodianName').value;
+        const dateDisposed = document.getElementById('dateDisposed').value;
 
         if (!unit || !caseRef || !incidentTitle || !dateSeized || !description || !category || !evidenceStatus || !custodianName) {
             alert('Please fill in all mandatory fields denoted by (*).');
@@ -427,7 +436,7 @@
             unit, caseRef, incidentTitle, dateSeized, placeSeizure,
             operatingUnit, investigatingUnit, description, category, qty, monetaryValue,
             serialNo, source, custodian, storageLocation, evidenceStatus,
-            remarks, custodianName
+            remarks, custodianName, dateDisposed
         ];
 
         const payload = {
@@ -509,14 +518,15 @@
             "No.", "Unit/Office", "Case Reference (Blotter/Case No.)", "Incident Title",
             "Date Seized / Surrendered", "Place of Seizure", "Operating Unit", "Investigating Unit",
             "Detailed Description", "Category", "Quantity", "Monetary Value", "Serial No./Markings",
-            "Source", "Current Custodian", "Storage Location", "Evidence Status", "Remarks", "Name of Evidence Custodian"
+            "Source", "Current Custodian", "Storage Location", "Evidence Status", "Remarks", 
+            "Name of Evidence Custodian", "Date Turn-Over / Released / Destroyed"
         ];
 
         const dataRows = targetRecords.map((r, idx) => [
             idx + 1, r.unit, r.caseRef, r.incidentTitle, r.dateSeized, r.placeSeizure,
             r.operatingUnit, r.investigatingUnit, r.description, r.category, r.qty, r.monetaryValue,
             r.serialNo, r.source, r.custodian, r.storageLocation, r.evidenceStatus,
-            r.remarks, r.custodianName
+            r.remarks, r.custodianName, r.dateDisposed
         ]);
 
         const worksheetData = [headers, ...dataRows];
@@ -538,4 +548,4 @@
 </script>
 
 </body>
-</html>v
+</html>
