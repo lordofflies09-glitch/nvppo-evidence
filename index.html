@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NVPPO Evidence Repository System</title>
+    <!-- SheetJS for Native Excel Exports (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             --pnp-blue: #0d3b66;
@@ -183,7 +185,7 @@
         <div class="card">
             <h2>Master Evidence Records</h2>
             <div class="action-btns">
-                <button class="btn-secondary" onclick="exportToCSV()">📥 Download CSV (Official PNP Format)</button>
+                <button class="btn-secondary" onclick="exportToExcel()">📥 Download Excel (.xlsx)</button>
             </div>
             <input type="text" id="searchBox" class="search-box" onkeyup="filterTable()" placeholder="🔍 Search records...">
             <br><br>
@@ -420,7 +422,7 @@
         });
     }
 
-    function exportToCSV() {
+    function exportToExcel() {
         if (records.length === 0) {
             alert("No records available to export.");
             return;
@@ -433,26 +435,22 @@
             "Source", "Current Custodian", "Storage Location", "Evidence Status", "Remarks", "Name of Evidence Custodian"
         ];
 
-        let csvContent = "\uFEFF";
-        csvContent += headers.map(h => `"${h}"`).join(",") + "\n";
+        const dataRows = records.map((r, idx) => [
+            idx + 1, r.unit, r.caseRef, r.incidentTitle, r.dateSeized, r.placeSeizure,
+            r.operatingUnit, r.investigatingUnit, r.description, r.qty, r.monetaryValue,
+            r.serialNo, r.source, r.custodian, r.storageLocation, r.evidenceStatus,
+            r.remarks, r.custodianName
+        ]);
 
-        records.forEach((r, idx) => {
-            const row = [
-                idx + 1, r.unit, r.caseRef, r.incidentTitle, r.dateSeized, r.placeSeizure,
-                r.operatingUnit, r.investigatingUnit, r.description, r.qty, r.monetaryValue,
-                r.serialNo, r.source, r.custodian, r.storageLocation, r.evidenceStatus,
-                r.remarks, r.custodianName
-            ];
-            csvContent += row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",") + "\n";
-        });
+        const worksheetData = [headers, ...dataRows];
+        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Master Logbook");
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `NVPPO_Evidence_Repository_Export_${new Date().toISOString().slice(0,10)}.csv`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        worksheet['!cols'] = Array(headers.length).fill({ wch: 20 });
+
+        const fileName = `NVPPO_Evidence_Repository_Export_${new Date().toISOString().slice(0,10)}.xlsx`;
+        XLSX.writeFile(workbook, fileName);
     }
 
     // Load records automatically on initial load
