@@ -53,7 +53,7 @@
         <img src="pnp_logo.png" 
              alt="PNP Logo" 
              style="height: 50px; width: auto;"
-             onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Philippine_National_Police_seal.svg/1200px-Philippine_National_Police_seal.svg.png';">
+             onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/c/c8/Philippine_National_Police_seal.svg';">
         <h1>NVPPO EVIDENCE REPOSITORY SYSTEM</h1>
     </div>
     <div style="font-weight: bold; letter-spacing: 0.5px;">Investigative Portal</div>
@@ -161,8 +161,18 @@
                         <input type="text" id="storageLocation" placeholder="e.g., Bayombong PS Vault Locker B">
                     </div>
                     <div class="form-group">
-                        <label>Evidence Status / Disposition (Period/Month)</label>
-                        <input type="text" id="evidenceStatus" placeholder="e.g., In Custody for Disposition">
+                        <label>Evidence Status / Disposition*</label>
+                        <select id="evidenceStatus" required>
+                            <option value="">Select Disposition Status...</option>
+                            <option value="In Custody">In Custody</option>
+                            <option value="Turned Over to Court">Turned Over to Court</option>
+                            <option value="Turned Over to Prosecutor">Turned Over to Prosecutor</option>
+                            <option value="Turned over to Forensic Group">Turned over to Forensic Group</option>
+                            <option value="Turned Over to OLEAs (BOC, DENR, etc)">Turned Over to OLEAs (BOC, DENR, etc)</option>
+                            <option value="Forfeited in Favor of Government">Forfeited in Favor of Government</option>
+                            <option value="Released to Owner">Released to Owner</option>
+                            <option value="Disposed/ Destroyed">Disposed/ Destroyed</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Remarks</label>
@@ -386,7 +396,7 @@
         const remarks = document.getElementById('remarks').value;
         const custodianName = document.getElementById('custodianName').value;
 
-        if (!unit || !caseRef || !incidentTitle || !dateSeized || !description || !custodianName) {
+        if (!unit || !caseRef || !incidentTitle || !dateSeized || !description || !evidenceStatus || !custodianName) {
             alert('Please fill in all mandatory fields denoted by (*).');
             return;
         }
