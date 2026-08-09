@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NVPPO Evidence Repository System</title>
+    <style>
+        :root {
+            --pnp-blue: #0d3b66;
+            --pnp-gold: #f4a261;
+            --pnp-dark: #1d3557;
+            --bg-gray: #f8f9fa;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: var(--bg-gray); }
+        header { background-color: var(--pnp-blue); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        header h1 { margin: 0; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-tabs { display: flex; gap: 10px; background-color: #092542; padding: 10px 30px; }
+        .tab-btn { background: none; border: none; color: #a3c1ad; font-size: 15px; font-weight: bold; padding: 8px 16px; cursor: pointer; border-radius: 4px; transition: 0.2s; }
+        .tab-btn.active, .tab-btn:hover { background-color: var(--pnp-gold); color: #000; }
+        .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 8px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-weight: 600; font-size: 12px; color: #333; margin-bottom: 5px; text-transform: uppercase; }
+        .form-group input, .form-group select, .form-group textarea { padding: 9px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        .form-group textarea { resize: vertical; }
+        .section-header { border-bottom: 2px solid var(--pnp-blue); padding-bottom: 5px; margin-top: 15px; margin-bottom: 15px; color: var(--pnp-blue); font-size: 15px; font-weight: bold; }
+        .btn-submit { background-color: var(--pnp-blue); color: white; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 20px; width: 100%; text-transform: uppercase; }
+        .btn-submit:hover { background-color: #092542; }
+        .btn-cancel { background-color: #e63946; color: white; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 10px; width: 100%; text-transform: uppercase; display: none; }
+        .btn-cancel:hover { background-color: #b71c1c; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 15px; white-space: nowrap; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: var(--pnp-blue); color: white; position: sticky; top: 0; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .search-box { width: 100%; padding: 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .badge { padding: 4px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; color: white; background-color: #2a9d8f; }
+        .action-btns { margin-bottom: 15px; display: flex; gap: 10px; }
+        .btn-secondary { background-color: #2a9d8f; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .btn-secondary:hover { background-color: #218377; }
+        .btn-edit { background-color: #f4a261; color: #000; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-weight: bold; font-size: 11px; }
+        .btn-edit:hover { background-color: #e76f51; color: #fff; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>NVPPO EVIDENCE REPOSITORY SYSTEM</h1>
+    <div>Investigative Portal</div>
+</header>
+
+<div class="nav-tabs">
+    <button class="tab-btn active" id="tabEntryBtn" onclick="switchTab('entry')">+ New Entry (Official Template)</button>
+    <button class="tab-btn" id="tabInventoryBtn" onclick="switchTab('inventory')">🔍 Master Evidence Logbook</button>
+</div>
+
+<div class="container">
+
+    <!-- TAB 1: ENTRY FORM -->
+    <div id="entry" class="tab-content active">
+        <div class="card">
+            <h2 id="formHeader">Official PNP Evidence Entry Form</h2>
+            <form id="evidenceForm">
+                <input type="hidden" id="editIndex" value="-1">
+                
+                <div class="section-header">Case & Location Information</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Unit / Office*</label>
+                        <select id="unit" required>
+                            <option value="">Select Station / Office...</option>
+                            <option value="Alfonso Castaneda PS">Alfonso Castaneda PS</option>
+                            <option value="Ambaguio PS">Ambaguio PS</option>
+                            <option value="Aritao PS">Aritao PS</option>
+                            <option value="Bagabag PS">Bagabag PS</option>
+                            <option value="Bambang PS">Bambang PS</option>
+                            <option value="Bayombong PS">Bayombong PS</option>
+                            <option value="Diadi PS">Diadi PS</option>
+                            <option value="Dupax Del Norte PS">Dupax Del Norte PS</option>
+                            <option value="Dupax Del Sur PS">Dupax Del Sur PS</option>
+                            <option value="Kasibu PS">Kasibu PS</option>
+                            <option value="Kayapa PS">Kayapa PS</option>
+                            <option value="Quezon PS">Quezon PS</option>
+                            <option value="Santa Fe PS">Santa Fe PS</option>
+                            <option value="Solano PS">Solano PS</option>
+                            <option value="Villaverde PS">Villaverde PS</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Case Reference (Blotter / Case No.)*</label>
+                        <input type="text" id="caseRef" placeholder="e.g., 025005000-202602-0562" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Incident Title*</label>
+                        <input type="text" id="incidentTitle" placeholder="e.g., RA 9165 / RA 10863 / PD 1602" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Date Seized / Surrendered*</label>
+                        <input type="date" id="dateSeized" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Place of Seizure*</label>
+                        <input type="text" id="placeSeizure" placeholder="e.g., Brgy. Busilac, Bayombong" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Operating Unit</label>
+                        <input type="text" id="operatingUnit" placeholder="e.g., NVPPO PDEU / Bayombong PS">
+                    </div>
+                    <div class="form-group">
+                        <label>Investigating Unit</label>
+                        <input type="text" id="investigatingUnit" placeholder="e.g., Bayombong MPS">
+                    </div>
+                </div>
+
+                <div class="section-header">Evidence Details</div>
+                <div class="form-grid">
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>Detailed Description (money, currency note, checks, land titles, etc.)*</label>
+                        <textarea id="description" rows="2" placeholder="Detailed item description, weight, denomination, condition..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity*</label>
+                        <input type="number" id="quantity" value="1" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Monetary Value of the evidence (indicate if estimate)</label>
+                        <input type="text" id="monetaryValue" placeholder="e.g., ₱132,000.00 (Est.)">
+                    </div>
+                    <div class="form-group">
+                        <label>Serial No. / Markings</label>
+                        <input type="text" id="serialNo" placeholder="e.g., PN925823 / JGR-1">
+                    </div>
+                    <div class="form-group">
+                        <label>Source (Seized / Surrendered / Recovered)</label>
+                        <select id="source">
+                            <option value="Seized">Seized</option>
+                            <option value="Surrendered">Surrendered</option>
+                            <option value="Recovered">Recovered</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="section-header">Custody, Storage & Status</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Current Custodian (Agency if forwarded)</label>
+                        <input type="text" id="custodian" placeholder="e.g., PCpl Juan Dela Cruz" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Storage Location</label>
+                        <input type="text" id="storageLocation" placeholder="e.g., Bayombong PS Vault Locker B">
+                    </div>
+                    <div class="form-group">
+                        <label>Evidence Status / Disposition (Period/Month)</label>
+                        <input type="text" id="evidenceStatus" placeholder="e.g., In Custody for Disposition">
+                    </div>
+                    <div class="form-group">
+                        <label>Remarks</label>
+                        <input type="text" id="remarks" placeholder="Additional notes or case updates">
+                    </div>
+                    <div class="form-group">
+                        <label>Name of Evidence Custodian*</label>
+                        <input type="text" id="custodianName" placeholder="Rank and Name of Custodian" required>
+                    </div>
+                </div>
+
+                <button type="button" id="submitBtn" class="btn-submit" onclick="saveEntry()">Submit & Add Record</button>
+                <button type="button" id="cancelBtn" class="btn-cancel" onclick="resetFormState()">Cancel Edit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TAB 2: MASTER LOGBOOK -->
+    <div id="inventory" class="tab-content">
+        <div class="card">
+            <h2>Master Evidence Records</h2>
+            <div class="action-btns">
+                <button class="btn-secondary" onclick="exportToCSV()">📥 Download CSV (Official PNP Format)</button>
+            </div>
+            <input type="text" id="searchBox" class="search-box" onkeyup="filterTable()" placeholder="🔍 Search records...">
+            <br><br>
+            <div style="overflow-x:auto;">
+                <table id="evidenceTable">
+                    <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>No.</th>
+                            <th>Unit/Office</th>
+                            <th>Case Reference</th>
+                            <th>Incident Title</th>
+                            <th>Date Seized</th>
+                            <th>Place of Seizure</th>
+                            <th>Operating Unit</th>
+                            <th>Investigating Unit</th>
+                            <th>Detailed Description</th>
+                            <th>Qty</th>
+                            <th>Monetary Value</th>
+                            <th>Serial / Markings</th>
+                            <th>Source</th>
+                            <th>Current Custodian</th>
+                            <th>Storage Location</th>
+                            <th>Evidence Status</th>
+                            <th>Remarks</th>
+                            <th>Name of Evidence Custodian</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Dynamic Entries -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw1AD0UQPck7ONxYO27DUyrmTJkgxvzTPQw2idbNAZZpqTFZAthrgeACwsX0Q3NccoJdg/exec";
+
+    let records = [];
+
+    // Fetch records from Google Sheet database on load
+    async function loadRecords() {
+        if (!SCRIPT_URL || SCRIPT_URL === "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+            console.warn("Script URL not properly configured.");
+            return;
+        }
+
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '<tr><td colspan="19" style="text-align:center; padding: 20px;">Loading live records from central database...</td></tr>';
+
+        try {
+            const res = await fetch(SCRIPT_URL, { method: 'GET', redirect: 'follow' });
+            const data = await res.json();
+
+            records = data.map(r => ({
+                unit: r['Unit'] || '',
+                caseRef: r['Case Reference'] || '',
+                incidentTitle: r['Incident Title'] || '',
+                dateSeized: r['Date Seized'] ? String(r['Date Seized']).substring(0,10) : '',
+                placeSeizure: r['Place of Seizure'] || '',
+                operatingUnit: r['Operating Unit'] || '',
+                investigatingUnit: r['Investigating Unit'] || '',
+                description: r['Detailed Description'] || '',
+                qty: r['Quantity'] || 1,
+                monetaryValue: r['Monetary Value'] || '',
+                serialNo: r['Serial No'] || r['Serial No.'] || '',
+                source: r['Source'] || '',
+                custodian: r['Current Custodian'] || '',
+                storageLocation: r['Storage Location'] || '',
+                evidenceStatus: r['Evidence Status'] || '',
+                remarks: r['Remarks'] || '',
+                custodianName: r['Name of Evidence Custodian'] || ''
+            }));
+
+            renderTable();
+        } catch (err) {
+            console.error("Error loading records:", err);
+            tbody.innerHTML = '<tr><td colspan="19" style="text-align:center; color: red; padding: 20px;">Unable to fetch records. Check internet connection or Apps Script execution permissions.</td></tr>';
+        }
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+
+        if (records.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="19" style="text-align:center; padding: 20px;">No evidence records found in master repository.</td></tr>';
+            return;
+        }
+
+        records.forEach((r, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><button class="btn-edit" onclick="editEntry(${index})">✏️ Edit</button></td>
+                <td><b>${index + 1}</b></td>
+                <td><b>${r.unit || ''}</b></td>
+                <td>${r.caseRef || ''}</td>
+                <td>${r.incidentTitle || ''}</td>
+                <td>${r.dateSeized || ''}</td>
+                <td>${r.placeSeizure || ''}</td>
+                <td>${r.operatingUnit || ''}</td>
+                <td>${r.investigatingUnit || ''}</td>
+                <td>${r.description || ''}</td>
+                <td>${r.qty || ''}</td>
+                <td>${r.monetaryValue || ''}</td>
+                <td><code>${r.serialNo || ''}</code></td>
+                <td>${r.source || ''}</td>
+                <td>${r.custodian || ''}</td>
+                <td>${r.storageLocation || ''}</td>
+                <td><span class="badge">${r.evidenceStatus || ''}</span></td>
+                <td>${r.remarks || ''}</td>
+                <td><b>${r.custodianName || ''}</b></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function editEntry(index) {
+        const r = records[index];
+        document.getElementById('editIndex').value = index;
+        document.getElementById('unit').value = r.unit || '';
+        document.getElementById('caseRef').value = r.caseRef || '';
+        document.getElementById('incidentTitle').value = r.incidentTitle || '';
+        document.getElementById('dateSeized').value = r.dateSeized || '';
+        document.getElementById('placeSeizure').value = r.placeSeizure || '';
+        document.getElementById('operatingUnit').value = r.operatingUnit || '';
+        document.getElementById('investigatingUnit').value = r.investigatingUnit || '';
+        document.getElementById('description').value = r.description || '';
+        document.getElementById('quantity').value = r.qty || 1;
+        document.getElementById('monetaryValue').value = r.monetaryValue || '';
+        document.getElementById('serialNo').value = r.serialNo || '';
+        document.getElementById('source').value = r.source || 'Seized';
+        document.getElementById('custodian').value = r.custodian || '';
+        document.getElementById('storageLocation').value = r.storageLocation || '';
+        document.getElementById('evidenceStatus').value = r.evidenceStatus || '';
+        document.getElementById('remarks').value = r.remarks || '';
+        document.getElementById('custodianName').value = r.custodianName || '';
+
+        document.getElementById('formHeader').innerText = `Editing Entry Record #${index + 1}`;
+        document.getElementById('submitBtn').innerText = 'Update Record';
+        document.getElementById('cancelBtn').style.display = 'block';
+
+        switchTab('entry');
+    }
+
+    function resetFormState() {
+        document.getElementById('evidenceForm').reset();
+        document.getElementById('editIndex').value = "-1";
+        document.getElementById('formHeader').innerText = 'Official PNP Evidence Entry Form';
+        document.getElementById('submitBtn').innerText = 'Submit & Add Record';
+        document.getElementById('cancelBtn').style.display = 'none';
+    }
+
+    async function saveEntry() {
+        const editIdx = parseInt(document.getElementById('editIndex').value);
+        const unit = document.getElementById('unit').value;
+        const caseRef = document.getElementById('caseRef').value;
+        const incidentTitle = document.getElementById('incidentTitle').value;
+        const dateSeized = document.getElementById('dateSeized').value;
+        const placeSeizure = document.getElementById('placeSeizure').value;
+        const operatingUnit = document.getElementById('operatingUnit').value;
+        const investigatingUnit = document.getElementById('investigatingUnit').value;
+        const description = document.getElementById('description').value;
+        const qty = document.getElementById('quantity').value;
+        const monetaryValue = document.getElementById('monetaryValue').value;
+        const serialNo = document.getElementById('serialNo').value;
+        const source = document.getElementById('source').value;
+        const custodian = document.getElementById('custodian').value;
+        const storageLocation = document.getElementById('storageLocation').value;
+        const evidenceStatus = document.getElementById('evidenceStatus').value;
+        const remarks = document.getElementById('remarks').value;
+        const custodianName = document.getElementById('custodianName').value;
+
+        if (!unit || !caseRef || !incidentTitle || !dateSeized || !description || !custodianName) {
+            alert('Please fill in all mandatory fields denoted by (*).');
+            return;
+        }
+
+        const rowArray = [
+            unit, caseRef, incidentTitle, dateSeized, placeSeizure,
+            operatingUnit, investigatingUnit, description, qty, monetaryValue,
+            serialNo, source, custodian, storageLocation, evidenceStatus,
+            remarks, custodianName
+        ];
+
+        const payload = {
+            action: editIdx >= 0 ? 'update' : 'add',
+            index: editIdx,
+            row: rowArray
+        };
+
+        const btn = document.getElementById('submitBtn');
+        const origText = btn.innerText;
+        btn.innerText = 'Syncing to Central Database...';
+        btn.disabled = true;
+
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+
+            alert(editIdx >= 0 ? 'Record updated successfully on central database!' : 'New record saved to central database!');
+            resetFormState();
+            await loadRecords();
+            switchTab('inventory');
+        } catch (err) {
+            console.error("Save error:", err);
+            alert("Failed to sync entry with central database. Verify Google Apps Script execution deployment setting.");
+        } finally {
+            btn.innerText = origText;
+            btn.disabled = false;
+        }
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        if(tabId === 'entry') document.getElementById('tabEntryBtn').classList.add('active');
+        if(tabId === 'inventory') document.getElementById('tabInventoryBtn').classList.add('active');
+    }
+
+    function filterTable() {
+        const query = document.getElementById('searchBox').value.toLowerCase();
+        const rows = document.querySelectorAll('#tableBody tr');
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(query) ? '' : 'none';
+        });
+    }
+
+    function exportToCSV() {
+        if (records.length === 0) {
+            alert("No records available to export.");
+            return;
+        }
+
+        const headers = [
+            "No.", "Unit/Office", "Case Reference (Blotter/Case No.)", "Incident Title",
+            "Date Seized / Surrendered", "Place of Seizure", "Operating Unit", "Investigating Unit",
+            "Detailed Description", "Quantity", "Monetary Value", "Serial No./Markings",
+            "Source", "Current Custodian", "Storage Location", "Evidence Status", "Remarks", "Name of Evidence Custodian"
+        ];
+
+        let csvContent = "\uFEFF";
+        csvContent += headers.map(h => `"${h}"`).join(",") + "\n";
+
+        records.forEach((r, idx) => {
+            const row = [
+                idx + 1, r.unit, r.caseRef, r.incidentTitle, r.dateSeized, r.placeSeizure,
+                r.operatingUnit, r.investigatingUnit, r.description, r.qty, r.monetaryValue,
+                r.serialNo, r.source, r.custodian, r.storageLocation, r.evidenceStatus,
+                r.remarks, r.custodianName
+            ];
+            csvContent += row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",") + "\n";
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `NVPPO_Evidence_Repository_Export_${new Date().toISOString().slice(0,10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // Load records automatically on initial load
+    window.addEventListener('DOMContentLoaded', loadRecords);
+</script>
+
+</body>
+</html>
