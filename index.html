@@ -192,8 +192,14 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Remarks</label>
-                        <input type="text" id="remarks" placeholder="Additional notes or case updates">
+                        <label>Remarks / Status Case Update</label>
+                        <select id="remarks">
+                            <option value="">Select Remarks / Case Status...</option>
+                            <option value="Newly Seized / Awaiting Order to Turn Over to Court">Newly Seized / Awaiting Order to Turn Over to Court</option>
+                            <option value="Old Seized / Awaiting Order to Turn Over to Court">Old Seized / Awaiting Order to Turn Over to Court</option>
+                            <option value="Old Seized / Ongoing Trial">Old Seized / Ongoing Trial</option>
+                            <option value="Old Seized / Turned Over to Owner After Suspect Pleaded Guilty">Old Seized / Turned Over to Owner After Suspect Pleaded Guilty</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Name of Evidence Custodian*</label>
@@ -339,7 +345,7 @@
         records.forEach((r, index) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><button class="btn-edit" onclick="editEntry(${index})">✏️ Edit</button></td>
+                <td><button class="btn-edit" onclick="editEntry(${index})">✏ Edit</button></td>
                 <td><b>${index + 1}</b></td>
                 <td><b>${r.unit || ''}</b></td>
                 <td>${r.caseRef || ''}</td>
@@ -548,4 +554,4 @@
 </script>
 
 </body>
-</html>v
+</html>
