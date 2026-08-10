@@ -38,10 +38,12 @@
         .search-box { width: 100%; padding: 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .badge { padding: 4px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; color: white; background-color: #2a9d8f; }
-        .action-btns { margin-bottom: 15px; display: flex; gap: 15px; align-items: flex-end; }
+        .badge { padding: 4px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; color: white; display: inline-block; }
+        .action-btns { margin-bottom: 15px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
         .btn-secondary { background-color: #2a9d8f; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
         .btn-secondary:hover { background-color: #218377; }
+        .btn-clear { background-color: #6c757d; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .btn-clear:hover { background-color: #5a6268; }
         .btn-edit { background-color: #f4a261; color: #000; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-weight: bold; font-size: 11px; }
         .btn-edit:hover { background-color: #e76f51; color: #fff; }
     </style>
@@ -61,7 +63,7 @@
 
 <div class="nav-tabs">
     <button class="tab-btn active" id="tabEntryBtn" onclick="switchTab('entry')">+ New Entry (Official Template)</button>
-    <button class="tab-btn" id="tabInventoryBtn" onclick="switchTab('inventory')">🔍 Master Evidence Logbook</button>
+    <button class="tab-btn" id="tabInventoryBtn" onclick="switchTab('inventory')"> Master Evidence Logbook</button>
 </div>
 
 <div class="container">
@@ -244,7 +246,8 @@
                         <option value="Villaverde PS">Villaverde PS</option>
                     </select>
                 </div>
-                <button class="btn-secondary" onclick="exportToExcel()">📥 Download Excel (.xlsx)</button>
+                <button class="btn-secondary" onclick="exportToExcel()"> Download Excel (.xlsx)</button>
+                <button class="btn-clear" onclick="clearFilters()">Reset Filters</button>
             </div>
 
             <input type="text" id="searchBox" class="search-box" onkeyup="filterTable()" placeholder="🔍 Search records by key text...">
@@ -291,8 +294,25 @@
 
     let records = [];
 
+    function formatDate(dateVal) {
+        if (!dateVal) return '';
+        const d = new Date(dateVal);
+        return isNaN(d.getTime()) ? String(dateVal).substring(0, 10) : d.toISOString().split('T')[0];
+    }
+
+    function getStatusBadgeStyle(status) {
+        switch (status) {
+            case 'In Custody': return 'background-color: #2a9d8f;';
+            case 'Turned Over to Court': 
+            case 'Turned Over to Prosecutor': return 'background-color: #e76f51;';
+            case 'Disposed/ Destroyed':
+            case 'Released to Owner': return 'background-color: #6c757d;';
+            default: return 'background-color: #0d3b66;';
+        }
+    }
+
     async function loadRecords() {
-        if (!SCRIPT_URL || SCRIPT_URL === "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+        if (!SCRIPT_URL || SCRIPT_URL.includes("PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE")) {
             console.warn("Script URL not properly configured.");
             return;
         }
@@ -308,7 +328,7 @@
                 unit: r['Unit'] || '',
                 caseRef: r['Case Reference'] || '',
                 incidentTitle: r['Incident Title'] || '',
-                dateSeized: r['Date Seized'] ? String(r['Date Seized']).substring(0,10) : '',
+                dateSeized: formatDate(r['Date Seized']),
                 placeSeizure: r['Place of Seizure'] || '',
                 operatingUnit: r['Operating Unit'] || '',
                 investigatingUnit: r['Investigating Unit'] || '',
@@ -323,7 +343,7 @@
                 evidenceStatus: r['Evidence Status'] || '',
                 remarks: r['Remarks'] || '',
                 custodianName: r['Name of Evidence Custodian'] || '',
-                dateDisposed: r['Date Turn-Over/Released/Destroyed'] || r['Date Turn-Over / Released / Destroyed'] ? String(r['Date Turn-Over/Released/Destroyed'] || r['Date Turn-Over / Released / Destroyed']).substring(0,10) : ''
+                dateDisposed: formatDate(r['Date Turn-Over/Released/Destroyed'] || r['Date Turn-Over / Released / Destroyed'])
             }));
 
             renderTable();
@@ -345,7 +365,7 @@
         records.forEach((r, index) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><button class="btn-edit" onclick="editEntry(${index})">✏ Edit</button></td>
+                <td><button class="btn-edit" onclick="editEntry(${index})">Edit</button></td>
                 <td><b>${index + 1}</b></td>
                 <td><b>${r.unit || ''}</b></td>
                 <td>${r.caseRef || ''}</td>
@@ -362,7 +382,7 @@
                 <td>${r.source || ''}</td>
                 <td>${r.custodian || ''}</td>
                 <td>${r.storageLocation || ''}</td>
-                <td><span class="badge">${r.evidenceStatus || ''}</span></td>
+                <td><span class="badge" style="${getStatusBadgeStyle(r.evidenceStatus)}">${r.evidenceStatus || ''}</span></td>
                 <td>${r.remarks || ''}</td>
                 <td><b>${r.custodianName || ''}</b></td>
                 <td>${r.dateDisposed || ''}</td>
@@ -505,6 +525,12 @@
     }
 
     function filterTable() {
+        filterByStation();
+    }
+
+    function clearFilters() {
+        document.getElementById('searchBox').value = '';
+        document.getElementById('stationFilter').value = 'ALL';
         filterByStation();
     }
 
